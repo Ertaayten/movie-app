@@ -17,8 +17,10 @@ namespace MovieApp.DataAccess.Concretes
         public async Task<List<Movie>> GetAllWithNavigationAsync(Expression<Func<Movie, bool>> filter = null)
         {
             return filter == null
-                ? await _context.Set<Movie>().Include(x => x.Director).ToListAsync()
-                : await _context.Set<Movie>().Include(x => x.Director).Where(filter).ToListAsync();
+                ? await _context.Set<Movie>().Include(x => x.Director)
+                    .Include(x => x.MovieActors).Include(x => x.MovieCategories).ToListAsync()
+                : await _context.Set<Movie>().Include(x => x.Director)
+                    .Include(x => x.MovieActors).Include(x => x.MovieCategories).Where(filter).ToListAsync();
         }
 
         public async Task<Movie> GetWithNavigationAsync(Expression<Func<Movie, bool>> filter = null)

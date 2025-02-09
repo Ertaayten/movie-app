@@ -9,6 +9,8 @@ namespace MovieApp.DataAccess
         public DbSet<Director> Directors { get; set; }
         public DbSet<Actor> Actors { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<MovieActor> MovieActors { get; set; }
+        public DbSet<MovieCategory> MovieCategories { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options): base(options)
         {
@@ -22,27 +24,41 @@ namespace MovieApp.DataAccess
                 .WithMany(d => d.Movies)
                 .HasForeignKey(m => m.DirectorId);
 
-            builder.Entity<Movie>()
-                .HasMany(m => m.Actors)
-                .WithMany()
-                .UsingEntity<Dictionary<string, object>>(
-                    "Movie_Actors",
-                    j => j.HasOne<Actor>().WithMany()
-                        .HasForeignKey("ActorId").OnDelete(DeleteBehavior.Cascade),
-                    j => j.HasOne<Movie>().WithMany()
-                        .HasForeignKey("MovieId").OnDelete(DeleteBehavior.Cascade)
-                );
+            builder.Entity<MovieActor>()
+                .HasOne(ma => ma.Movie)
+                .WithMany(m => m.MovieActors)
+                .HasForeignKey(ma => ma.MovieId);
 
-            builder.Entity<Movie>()
-                 .HasMany(m => m.Categories)
-                 .WithMany()
-                 .UsingEntity<Dictionary<string, object>>(
-                     "Movie_Categories",
-                     j => j.HasOne<Category>().WithMany()
-                         .HasForeignKey("CategoryId").OnDelete(DeleteBehavior.Cascade),
-                     j => j.HasOne<Movie>().WithMany()
-                         .HasForeignKey("MovieId").OnDelete(DeleteBehavior.Cascade)
-                 );
+            builder.Entity<MovieActor>()
+               .HasOne(ma => ma.Actor)
+               .WithMany(a => a.MovieActors)
+               .HasForeignKey(ma => ma.ActorId);
+
+            builder.Entity<MovieCategory>()
+                .HasOne(mc => mc.Movie)
+                .WithMany(m => m.MovieCategories)
+                .HasForeignKey(mc => mc.MovieId);
+
+            builder.Entity<MovieCategory>()
+               .HasOne(mc => mc.Category)
+               .WithMany(c => c.MovieCategories)
+               .HasForeignKey(mc => mc.CategoryId);
+
+            builder.Entity<MovieCategory>()
+                .Navigation(x => x.Category)
+                .AutoInclude();
+
+            builder.Entity<MovieCategory>()
+             .Navigation(x => x.Movie)
+             .AutoInclude();
+
+            builder.Entity<MovieActor>()
+             .Navigation(x => x.Movie)
+             .AutoInclude();
+
+            builder.Entity<MovieActor>()
+             .Navigation(x => x.Actor)
+             .AutoInclude();
         }
     }
 }

@@ -16,7 +16,10 @@ namespace MovieApp.Core.DataAccess
         }
         public async Task Add(TEntity entity)
         {
-            entity.Id = Guid.NewGuid();
+            if (entity.Id == null)
+            {
+                entity.Id = Guid.NewGuid();
+            }
             entity.CreatedAt = DateTime.Now;
             entity.UpdatedAt = DateTime.Now;
 
