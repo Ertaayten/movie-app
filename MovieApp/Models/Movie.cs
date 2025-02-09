@@ -10,9 +10,9 @@
         public Guid DirectorId { get; set; }
 
         // Navigation property
-        public List<Category>? Categories { get; set; }
         public Director? Director { get; set; }
-        public List<Actor>? Actors { get; set; }
+        public List<MovieActor>? MovieActors { get; set; }
+        public List<MovieCategory>? MovieCategories { get; set; }
 
     }
 }

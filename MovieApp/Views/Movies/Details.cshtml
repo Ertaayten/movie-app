@@ -46,6 +46,18 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Director.Id)
         </dd>
+        <dt class="col-sm-2">
+            Actors
+        </dt>
+        <dd class="col-sm-10">
+            @string.Join(", ", @Model.MovieActors.Select(x => x.Actor.Name + " " + x.Actor.Surname))
+        </dd>
+        <dt class="col-sm-2">
+            Categories
+        </dt>
+        <dd class="col-sm-10">
+            @string.Join(", ", @Model.MovieCategories.Select(x => x.Category.Name))
+        </dd>
     </dl>
 </div>
 <div>

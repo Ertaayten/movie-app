@@ -20,6 +20,8 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IActorRepository, ActorRepository>();
 builder.Services.AddScoped<IDirectorRepository, DirectorRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddScoped<IMovieCategoryRepository, MovieCategoryRepository>();
+builder.Services.AddScoped<IMovieActorRepository, MovieActorRepository>();
 
 var app = builder.Build();
 

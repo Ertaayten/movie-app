@@ -30,6 +30,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.Director)
             </th>
+            <th>
+                Actors
+            </th>
+            <th>
+                Categories
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -52,7 +58,13 @@
                 @Html.DisplayFor(modelItem => item.AgeLimit)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Director.Id)
+                @Html.DisplayFor(modelItem => item.Director.Name)
+            </td>
+            <td>
+                @string.Join(", ", @item.MovieActors.Select(x => x.Actor.Name))
+            </td>
+            <td>
+                @string.Join(", ", @item.MovieCategories.Select(x => x.Category.Name))
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

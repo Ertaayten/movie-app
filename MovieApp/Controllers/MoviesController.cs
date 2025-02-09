@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MovieApp.DataAccess;
 using MovieApp.DataAccess.Abstracts;
 using MovieApp.Models;
+using MovieApp.Models.ViewModels;
 
 namespace MovieApp.Controllers
 {
@@ -15,21 +16,29 @@ namespace MovieApp.Controllers
     {
         private readonly IMovieRepository _repository;
         private readonly IDirectorRepository _directorRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IActorRepository _actorRepository;
+        private readonly IMovieCategoryRepository _movieCategoryRepository;
+        private readonly IMovieActorRepository _movieActorRepository;
 
-        public MoviesController(IMovieRepository repository, IDirectorRepository directorRepository)
+        public MoviesController(IMovieRepository repository, IDirectorRepository directorRepository, ICategoryRepository categoryRepository, IMovieCategoryRepository movieCategoryRepository, IMovieActorRepository movieActorRepository, IActorRepository actorRepository)
         {
             _repository = repository;
             _directorRepository = directorRepository;
+            _categoryRepository = categoryRepository;
+            _movieCategoryRepository = movieCategoryRepository;
+            _movieActorRepository = movieActorRepository;
+            _actorRepository = actorRepository;
         }
 
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-
-            return View(await _repository.GetAllWithNavigationAsync());
+            var movies = await _repository.GetAllWithNavigationAsync();
+            return View(movies);
         }
 
-        // GET: Movies/Details/5
+        // GET: Movies/ /5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -37,19 +46,22 @@ namespace MovieApp.Controllers
                 return NotFound();
             }
 
-            var movie = await _repository.GetAllWithNavigationAsync();
+            var movie = await _repository.GetAllWithNavigationAsync(x => x.Id == id);
             if (movie == null)
             {
                 return NotFound();
             }
 
-            return View(movie);
+            return View(movie.First());
         }
 
         // GET: Movies/Create
         public IActionResult Create()
         {
-            ViewData["DirectorId"] = new SelectList(_directorRepository.GetAll(), "Id", "Id");
+            ViewData["DirectorId"] = new SelectList(_directorRepository.GetAll(), "Id", "Name");
+            ViewData["Categories"] = new SelectList(_categoryRepository.GetAll(), "Id", "Name");
+            ViewData["Actors"] = new SelectList(_actorRepository.GetAll(), "Id", "Name");
+
             return View();
         }
 
@@ -58,16 +70,34 @@ namespace MovieApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Language,Time,AgeLimit,DirectorId,Id")] Movie movie)
+        public async Task<IActionResult> Create([Bind("Name,Description,Language,Time,AgeLimit,DirectorId,Id,Categories,Actors")] MovieCreateViewModel movieCreateViewModel)
         {
             if (ModelState.IsValid)
             {
-                movie.Id = Guid.NewGuid();
-                await _repository.Add(movie);
+                movieCreateViewModel.Id = Guid.NewGuid();
+                await _repository.Add(movieCreateViewModel);
+                foreach (var item in movieCreateViewModel.Categories)
+                {
+                    var movieCategory = new MovieCategory()
+                    {
+                        MovieId = movieCreateViewModel.Id,
+                        CategoryId = item
+                    };
+                    await _movieCategoryRepository.Add(movieCategory);
+                }
+                foreach (var item in movieCreateViewModel.Actors)
+                {
+                    var movieActor = new MovieActor()
+                    {
+                        MovieId = movieCreateViewModel.Id,
+                        ActorId = item
+                    };
+                    await _movieActorRepository.Add(movieActor);
+                }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DirectorId"] = new SelectList(_directorRepository.GetAll(), "Id", "Id", movie.DirectorId);
-            return View(movie);
+            ViewData["DirectorId"] = new SelectList(_directorRepository.GetAll(), "Id", "Id", movieCreateViewModel.DirectorId);
+            return View(movieCreateViewModel);
         }
 
         // GET: Movies/Edit/5
